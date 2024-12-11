@@ -1,9 +1,11 @@
 package ru.DTF98.TaskServiceWithAspect.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.DTF98.TaskServiceWithAspect.exception.NotFoundException;
+import ru.DTF98.TaskServiceWithAspect.kafka.producer.KafkaTaskProducer;
 import ru.DTF98.TaskServiceWithAspect.model.Task;
 import ru.DTF98.TaskServiceWithAspect.repository.TaskRepository;
 
@@ -11,14 +13,11 @@ import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
-
-    @Autowired
-    public TaskService(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
-    }
-
+    private final KafkaTaskProducer kafkaTaskProducer;
+    private final Environment env;
     public Task createTask(Task task) {
         return taskRepository.save(task);
     }
@@ -38,7 +37,9 @@ public class TaskService {
         } else if (task.getUserId() != null) {
             existingTask.setUserId(task.getUserId());
         }
-        return taskRepository.save(existingTask);
+        Task response = taskRepository.save(existingTask);
+        kafkaTaskProducer.sendTo(env.getProperty("kafka.topic.task-updates"), response);
+        return response;
     }
 
     public void deleteTask(Long id) {

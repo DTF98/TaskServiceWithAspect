@@ -14,14 +14,8 @@ import java.util.Arrays;
 public class MainAspect {
     private static final Logger logger = LoggerFactory.getLogger(MainAspect.class);
 
-    @Before("execution(* ru.DTF98.TaskServiceWithAspect.service.TaskService.*(..))")
+    @Before("@annotation(ru.DTF98.TaskServiceWithAspect.aspect.annotations.LoggerAnnotationBefore)")
     public void beforeAdviceService(JoinPoint joinPoint) {
-        logger.info("Before advice [Service]: Method invoked: {}", joinPoint.getSignature().getName());
-        logger.info("Arguments: {}", Arrays.toString(joinPoint.getArgs()));
-    }
-
-    @Before("execution(* ru.DTF98.TaskServiceWithAspect.controller.TaskController.*(..))")
-    public void beforeAdviceController(JoinPoint joinPoint) {
         logger.info("Before advice [Controller]: Method invoked: {}", joinPoint.getSignature().getName());
         logger.info("Arguments: {}", Arrays.toString(joinPoint.getArgs()));
     }
