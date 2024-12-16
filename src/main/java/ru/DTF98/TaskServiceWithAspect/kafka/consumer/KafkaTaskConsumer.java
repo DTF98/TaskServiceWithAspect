@@ -13,8 +13,8 @@ import ru.DTF98.TaskServiceWithAspect.service.NotificationService;
 
 import java.util.List;
 
-import static ru.DTF98.TaskServiceWithAspect.kafka.constants.KafkaConfigConstants.DEFAULT_TOPIC;
-import static ru.DTF98.TaskServiceWithAspect.kafka.constants.KafkaConfigConstants.GROUP_ID;
+import static ru.DTF98.TaskServiceWithAspect.config.KafkaConfig.KafkaConfigConstants.DEFAULT_TOPIC;
+import static ru.DTF98.TaskServiceWithAspect.config.KafkaConfig.KafkaConfigConstants.GROUP_ID;
 
 @Component
 @RequiredArgsConstructor
@@ -31,8 +31,9 @@ public class KafkaTaskConsumer {
                          @Header(KafkaHeaders.RECEIVED_KEY) String key) {
         log.debug("Task Consumer: обработка новых сообщений");
         log.info("Updated Task = {} from topic = {}", messageList, topic);
+        String to = "recipientEmailTo@gmail.com";
         try {
-            notificationService.sendEmail(messageList.get(0));
+            notificationService.sendEmail(to, messageList.get(0));
         } finally {
             ack.acknowledge();
         }

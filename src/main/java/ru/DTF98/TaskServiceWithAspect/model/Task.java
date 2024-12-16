@@ -10,7 +10,6 @@ import lombok.*;
 @Getter
 @Entity
 @Table(name = "tasks")
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,17 +22,14 @@ public class Task {
     private Long id;
 
     @Column(name = "title", nullable = false)
-    @NotNull
     @JsonProperty("title")
     private String title;
 
     @Column(name = "description", nullable = false)
-    @NotNull
     @JsonProperty("description")
     private String description;
 
     @Column(name = "user_id", nullable = false)
-    @NotNull
     private Long userId;
 
     @Override

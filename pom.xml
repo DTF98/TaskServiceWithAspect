@@ -11,6 +11,7 @@
 	<groupId>ru.DTF98</groupId>
 	<artifactId>TaskServiceWithAspect</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
 	<name>TaskServiceWithAspect</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>

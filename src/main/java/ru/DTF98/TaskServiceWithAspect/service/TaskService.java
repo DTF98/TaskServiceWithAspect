@@ -1,15 +1,20 @@
 package ru.DTF98.TaskServiceWithAspect.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.DTF98.TaskServiceWithAspect.dto.TaskRequestDto;
+import ru.DTF98.TaskServiceWithAspect.dto.TaskResponseDto;
 import ru.DTF98.TaskServiceWithAspect.exception.NotFoundException;
 import ru.DTF98.TaskServiceWithAspect.kafka.producer.KafkaTaskProducer;
+import ru.DTF98.TaskServiceWithAspect.mapper.TaskMapper;
 import ru.DTF98.TaskServiceWithAspect.model.Task;
 import ru.DTF98.TaskServiceWithAspect.repository.TaskRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.DTF98.TaskServiceWithAspect.config.KafkaConfig.KafkaConfigConstants.DEFAULT_TOPIC;
 
 @Service
 @Transactional
@@ -17,29 +22,33 @@ import java.util.List;
 public class TaskService {
     private final TaskRepository taskRepository;
     private final KafkaTaskProducer kafkaTaskProducer;
-    private final Environment env;
-    public Task createTask(Task task) {
-        return taskRepository.save(task);
+    private final TaskMapper taskMapper;
+
+    public TaskResponseDto createTask(TaskRequestDto requestDto) {
+        Task task = taskMapper.toModelFromRequest(requestDto);
+        return taskMapper.toResponse(taskRepository.save(task));
     }
 
     @Transactional(readOnly = true)
-    public Task getTaskById(Long id) {
-        return taskRepository.findById(id).orElseThrow(
-                () -> new NotFoundException(String.format("Task with id = %d not found.", id)));
+    public TaskResponseDto getTaskById(Long id) {
+        return taskMapper.toResponse(taskRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(String.format("Task with id = %d not found.", id))));
     }
 
-    public Task updateTask(Long id, Task task) {
-        Task existingTask = getTaskById(id);
-        if (task.getTitle() != null) {
-            existingTask.setTitle(task.getTitle());
-        } else if (task.getDescription() != null) {
-            existingTask.setDescription(task.getDescription());
-        } else if (task.getUserId() != null) {
-            existingTask.setUserId(task.getUserId());
+    public TaskResponseDto updateTask(Long id, TaskRequestDto requestDto) {
+        Task existingTask = taskMapper.toModelFromResponse(getTaskById(id));
+        if (requestDto.getTitle() != null) {
+            existingTask.setTitle(requestDto.getTitle());
+        }
+        if (requestDto.getDescription() != null) {
+            existingTask.setDescription(requestDto.getDescription());
+        }
+        if (requestDto.getUserId() != null) {
+            existingTask.setUserId(requestDto.getUserId());
         }
         Task response = taskRepository.save(existingTask);
-        kafkaTaskProducer.sendTo(env.getProperty("kafka.topic.task-updates"), response);
-        return response;
+        kafkaTaskProducer.sendTo(DEFAULT_TOPIC, response);
+        return taskMapper.toResponse(response);
     }
 
     public void deleteTask(Long id) {
@@ -48,7 +57,9 @@ public class TaskService {
     }
 
     @Transactional(readOnly = true)
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskResponseDto> getAllTasks() {
+        return taskRepository.findAll().stream()
+                .map(taskMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }
