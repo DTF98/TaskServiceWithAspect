@@ -1,6 +1,5 @@
 package ru.DTF98.TaskServiceWithAspect.dto;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
