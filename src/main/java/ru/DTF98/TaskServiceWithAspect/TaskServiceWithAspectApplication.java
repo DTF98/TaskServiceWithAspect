@@ -7,7 +7,9 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @SpringBootApplication
 @EnableAspectJAutoProxy
 public class TaskServiceWithAspectApplication {
+
 	public static void main(String[] args) {
 		SpringApplication.run(TaskServiceWithAspectApplication.class, args);
 	}
+
 }
