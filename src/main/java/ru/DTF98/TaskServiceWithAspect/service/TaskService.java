@@ -3,6 +3,11 @@ package ru.DTF98.TaskServiceWithAspect.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import ru.DTF98.SpringStarterLogging.annotations.LoggerAspectAfterReturning;
+import ru.DTF98.SpringStarterLogging.annotations.LoggerAspectAfterThrowing;
+import ru.DTF98.SpringStarterLogging.annotations.LoggerAspectAround;
+import ru.DTF98.SpringStarterLogging.annotations.LoggerAspectBefore;
 import ru.DTF98.TaskServiceWithAspect.dto.TaskRequestDto;
 import ru.DTF98.TaskServiceWithAspect.dto.TaskResponseDto;
 import ru.DTF98.TaskServiceWithAspect.exception.NotFoundException;
@@ -24,17 +29,20 @@ public class TaskService {
     private final KafkaTaskProducer kafkaTaskProducer;
     private final TaskMapper taskMapper;
 
+    @LoggerAspectAround
     public TaskResponseDto createTask(TaskRequestDto requestDto) {
         Task task = taskMapper.toModelFromRequest(requestDto);
         return taskMapper.toResponse(taskRepository.save(task));
     }
 
+    @LoggerAspectAfterReturning
     @Transactional(readOnly = true)
     public TaskResponseDto getTaskById(Long id) {
         return taskMapper.toResponse(taskRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Task with id = %d not found.", id))));
     }
 
+    @LoggerAspectAfterReturning
     public TaskResponseDto updateTask(Long id, TaskRequestDto requestDto) {
         Task existingTask = taskMapper.toModelFromResponse(getTaskById(id));
         if (requestDto.getTitle() != null) {
@@ -51,11 +59,13 @@ public class TaskService {
         return taskMapper.toResponse(response);
     }
 
+    @LoggerAspectAfterThrowing
     public void deleteTask(Long id) {
         getTaskById(id);
         taskRepository.deleteById(id);
     }
 
+    @LoggerAspectBefore
     @Transactional(readOnly = true)
     public List<TaskResponseDto> getAllTasks() {
         return taskRepository.findAll().stream()

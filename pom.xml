@@ -11,7 +11,6 @@
 	<groupId>ru.DTF98</groupId>
 	<artifactId>TaskServiceWithAspect</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
 	<name>TaskServiceWithAspect</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -91,8 +90,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>ru.DTF98</groupId>
+			<artifactId>spring-starter-logging</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
