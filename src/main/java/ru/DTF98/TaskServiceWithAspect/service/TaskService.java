@@ -1,9 +1,8 @@
 package ru.DTF98.TaskServiceWithAspect.service;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import ru.DTF98.SpringStarterLogging.annotations.LoggerAspectAfterReturning;
 import ru.DTF98.SpringStarterLogging.annotations.LoggerAspectAfterThrowing;
 import ru.DTF98.SpringStarterLogging.annotations.LoggerAspectAround;
@@ -23,11 +22,17 @@ import static ru.DTF98.TaskServiceWithAspect.config.KafkaConfig.KafkaConfigConst
 
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
     private final KafkaTaskProducer kafkaTaskProducer;
     private final TaskMapper taskMapper;
+
+    @Autowired
+    public TaskService(TaskRepository taskRepository, KafkaTaskProducer kafkaTaskProducer, TaskMapper taskMapper) {
+        this.taskRepository = taskRepository;
+        this.kafkaTaskProducer = kafkaTaskProducer;
+        this.taskMapper = taskMapper;
+    }
 
     @LoggerAspectAround
     public TaskResponseDto createTask(TaskRequestDto requestDto) {
